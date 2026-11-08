@@ -34,6 +34,7 @@ jobs:
           cp /tmp/claimweave-v02/package.json /tmp/claimweave-v02/server.mjs /tmp/claimweave-v02/ClaimWeave-Demo.html .
       - run: npm test
       - run: npm run build
+      - run: node scripts/standalone.mjs
       - name: Prepare static demo
         run: |
           cp -R dist/. docs/
