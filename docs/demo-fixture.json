@@ -41,7 +41,7 @@
         "monthlyIncome",
         "city"
       ],
-      "expiresAt": "2027-01-01",
+      "expiresAt": "2027-12-31",
       "revoked": false
     },
     {
@@ -51,7 +51,7 @@
         "monthlyIncome",
         "city"
       ],
-      "expiresAt": "2027-01-01",
+      "expiresAt": "2027-12-31",
       "revoked": false
     },
     {
@@ -61,7 +61,7 @@
         "enrolled",
         "monthlyIncome"
       ],
-      "expiresAt": "2027-01-01",
+      "expiresAt": "2027-12-31",
       "revoked": false
     }
   ],

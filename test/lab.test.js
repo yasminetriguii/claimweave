@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {seed,programs} from '../dist/engine.js';
+import {planRepairs,runCohort,cohortFixtures,catalog} from '../dist/lab.js';
+test('baseline needs no new collection steps',()=>{const p=planRepairs(seed());assert.equal(p.minimumSteps,0);assert.equal(p.requestCount,0);});
+test('six stale checks use two collection steps in the explicit catalog',()=>{const p=planRepairs(seed(),programs,'2027-03-08');assert.equal(p.requestCount,6);assert.equal(p.distinctFields,3);assert.equal(p.minimumSteps,2);assert.equal(p.steps.reduce((n,s)=>n+s.supports.length,0),6);});
+test('minimum changes to three when the multi-field option is absent',()=>{assert.equal(planRepairs(seed(),programs,'2027-03-08',catalog.slice(0,3)).minimumSteps,3);});
+test('uncovered fields cannot be presented as a valid plan',()=>{const p=planRepairs(seed(),programs,'2027-03-08',catalog.slice(0,1));assert.equal(p.covered,false);assert.equal(p.minimumSteps,null);assert.ok(p.uncoveredFields.includes('city'));});
+test('withdrawn consent is not treated as evidence collection',()=>{const s=seed();s.consents.forEach(c=>c.revoked=true);const p=planRepairs(s);assert.equal(p.requestCount,0);assert.equal(p.steps.length,0);assert.equal(p.consent.length,3);});
+test('conflicts remain with human reviewers',()=>{const s=seed();s.evidence.push({...s.evidence[0],id:'conflict',fields:{monthlyIncome:3200}});const p=planRepairs(s);assert.equal(p.steps.length,0);assert.equal(p.manual.filter(m=>m.status==='conflict').length,3);});
+test('catalog size is bounded',()=>assert.throws(()=>planRepairs(seed(),programs,'2026-11-08',Array(13).fill(catalog[0]))));
+test('cohort compares 36 program outcomes and isolates three changed housing cases',()=>{const r=runCohort(2000);assert.equal(r.summary.caseCount,12);assert.equal(r.summary.programComparisons,36);assert.equal(r.summary.statusChanges,3);assert.deepEqual(r.changes.map(c=>c.caseId),['case-04','case-05','case-06']);assert.ok(r.changes.every(c=>c.program==='Housing bridge'));});
+test('no-op policy generates no status changes',()=>assert.equal(runCohort(2400).summary.statusChanges,0));
+test('unknown evidence stays review under both policy versions',()=>{for(const c of runCohort(2000).cases.slice(9)){assert.equal(c.before[0].status,'review');assert.equal(c.after[0].status,'review');}});
+test('invalid policy caps are rejected',()=>{for(const x of [-1,10001,NaN,Infinity])assert.throws(()=>runCohort(x));});
+test('cohort exports include full reproducible policies and fixture inputs',()=>{const r=runCohort();assert.equal(r.policies.before[0].rules[0].value,2400);assert.equal(r.policies.after[0].rules[0].value,2000);assert.equal(r.cases[0].input.evidence[0].fields.monthlyIncome,1500);assert.equal(cohortFixtures()[0].state.evidence[0].fields.monthlyIncome,1500);});

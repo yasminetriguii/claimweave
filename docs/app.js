@@ -46,3 +46,4 @@ $('reset').onclick=()=>{state=seed();asOf=demoDate;selected='housing';pending=nu
 $('import').onclick=()=>$('file').click();
 $('file').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>100000)throw Error('Demo import must be under 100 KB.');const raw=validateState(JSON.parse(await file.text()));state={schemaVersion:1,evidence:structuredClone(raw.evidence),consents:structuredClone(raw.consents),events:[]};pending=null;$('apply').disabled=true;log('Imported synthetic JSON fixture; all checks recalculated.');render();notify('Fixture loaded in browser memory only.');}catch(err){notify('Import rejected: '+err.message);}finally{e.target.value='';}};
 render();
+import('./lab.js').then(m=>m.mount(()=>({state:structuredClone(state),asOf}),log)).catch(()=>notify('Repair tools could not load. Reload the page to retry.'));

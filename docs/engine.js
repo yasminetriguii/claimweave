@@ -16,7 +16,7 @@ export function seed(){return {schemaVersion:1,evidence:[
   {id:'payroll',title:'Synthetic payroll statement',source:'Demo payroll connector',issuedAt:'2026-10-27',fields:{monthlyIncome:2250,employer:'Example Co',accountNumber:'DEMO-DO-NOT-EXPORT'}},
   {id:'utility',title:'Synthetic utility record',source:'Demo utility connector',issuedAt:'2026-10-19',fields:{city:'Ottawa',streetAddress:'Synthetic address, withheld'}},
   {id:'enrollment',title:'Synthetic enrollment record',source:'Demo registrar connector',issuedAt:'2026-09-06',fields:{enrolled:true,studentNumber:'DEMO-DO-NOT-EXPORT'}}
-],consents:programs.map(p=>({programId:p.id,purpose:p.purpose,fields:p.rules.map(r=>r.field),expiresAt:'2027-01-01',revoked:false})),events:[]};}
+],consents:programs.map(p=>({programId:p.id,purpose:p.purpose,fields:p.rules.map(r=>r.field),expiresAt:'2027-12-31',revoked:false})),events:[]};}
 const isDate = s => typeof s==='string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && Number.isFinite(Date.parse(s+'T00:00:00Z')) && new Date(s+'T00:00:00Z').toISOString().slice(0,10)===s;
 export function validateState(s){
   if(!s||s.schemaVersion!==1||!Array.isArray(s.evidence)||!Array.isArray(s.consents)||s.evidence.length>100||s.consents.length>30)throw Error('Expected schemaVersion 1, up to 100 evidence records and 30 consents.');
