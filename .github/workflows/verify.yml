@@ -32,7 +32,18 @@ jobs:
           unzip -q ClaimWeave-v02.zip -d /tmp/claimweave-v02
           cp -R /tmp/claimweave-v02/dist /tmp/claimweave-v02/docs /tmp/claimweave-v02/scripts /tmp/claimweave-v02/test .
           cp /tmp/claimweave-v02/package.json /tmp/claimweave-v02/server.mjs /tmp/claimweave-v02/ClaimWeave-Demo.html .
+      - name: Expand verified v0.3 backend once
+        if: hashFiles('backend.mjs') == '' && hashFiles('ClaimWeave-v03.zip') != ''
+        run: |
+          set -euo pipefail
+          echo "a5da2f20ce02016c41c713e92fe78f207300a5b7f19d5375cc85cba2b1ce036f  ClaimWeave-v03.zip" | sha256sum --check
+          unzip -q ClaimWeave-v03.zip -d /tmp/claimweave-v03
+          cp -R /tmp/claimweave-v03/dist /tmp/claimweave-v03/docs /tmp/claimweave-v03/scripts /tmp/claimweave-v03/test .
+          cp /tmp/claimweave-v03/package.json /tmp/claimweave-v03/server.mjs /tmp/claimweave-v03/backend.mjs /tmp/claimweave-v03/README.md /tmp/claimweave-v03/Dockerfile .
       - run: npm test
+      - name: Verify real HTTP account lifecycle
+        if: hashFiles('backend.mjs') != ''
+        run: npm run test:http
       - run: npm run build
       - run: node scripts/standalone.mjs
       - name: Prepare static demo
@@ -44,6 +55,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add dist docs scripts test package.json server.mjs README.md ClaimWeave-Demo.html
+          if [ -f backend.mjs ]; then git add backend.mjs Dockerfile; fi
           if ! git diff --cached --quiet; then
             git commit -m "Expand verified ClaimWeave source and prepare demo"
             git push
