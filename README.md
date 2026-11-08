@@ -1,3 +1,5 @@
+[Open the live demo](https://yasminetriguii.github.io/claimweave/) · [Verification workflow](https://github.com/yasminetriguii/claimweave/actions/workflows/verify.yml)
+
 # ClaimWeave
 
 **One record. Every dependency.**
