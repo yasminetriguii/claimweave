@@ -24,11 +24,19 @@ jobs:
           unzip -q ClaimWeave-Project.zip -d /tmp/claimweave-source
           cp -R /tmp/claimweave-source/dist /tmp/claimweave-source/docs /tmp/claimweave-source/scripts /tmp/claimweave-source/test .
           cp /tmp/claimweave-source/package.json /tmp/claimweave-source/server.mjs /tmp/claimweave-source/README.md /tmp/claimweave-source/ClaimWeave-Demo.html .
+      - name: Expand verified v0.2 release once
+        if: hashFiles('dist/lab.js') == '' && hashFiles('ClaimWeave-v02.zip') != ''
+        run: |
+          set -euo pipefail
+          echo "6812d1dfdb5203bf081951434a499e75782ffcd304ade6733f087436491d3973  ClaimWeave-v02.zip" | sha256sum --check
+          unzip -q ClaimWeave-v02.zip -d /tmp/claimweave-v02
+          cp -R /tmp/claimweave-v02/dist /tmp/claimweave-v02/docs /tmp/claimweave-v02/scripts /tmp/claimweave-v02/test .
+          cp /tmp/claimweave-v02/package.json /tmp/claimweave-v02/server.mjs /tmp/claimweave-v02/ClaimWeave-Demo.html .
       - run: npm test
       - run: npm run build
       - name: Prepare static demo
         run: |
-          cp dist/index.html dist/styles.css dist/app.js dist/engine.js docs/
+          cp -R dist/. docs/
           touch docs/.nojekyll
       - name: Commit expanded source and verified demo assets
         run: |
