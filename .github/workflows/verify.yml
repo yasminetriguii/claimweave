@@ -61,6 +61,9 @@ jobs:
           unzip -q ClaimWeave-v031.zip -d /tmp/claimweave-v031
           cp -R /tmp/claimweave-v031/dist /tmp/claimweave-v031/docs /tmp/claimweave-v031/scripts /tmp/claimweave-v031/test .
           cp /tmp/claimweave-v031/package.json /tmp/claimweave-v031/server.mjs /tmp/claimweave-v031/backend.mjs /tmp/claimweave-v031/storage.mjs /tmp/claimweave-v031/Dockerfile .
+      - name: Apply PostgreSQL index compatibility correction
+        if: hashFiles('storage.mjs') != ''
+        run: sed -i 's/INDEX IF NOT EXISTS session_user /INDEX IF NOT EXISTS cw_session_user_idx /' backend.mjs
       - run: npm install --ignore-scripts
       - run: npm test
       - name: Verify PostgreSQL account isolation and consent
