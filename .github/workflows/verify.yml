@@ -1,0 +1,45 @@
+name: Verify and prepare ClaimWeave
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: claimweave-source
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Expand verified source archive on first run
+        if: hashFiles('package.json') == ''
+        run: |
+          set -euo pipefail
+          echo "4b5de4d5e9a9ccea8f5a2fbeb357548e7faf36118c685ee40e1f4c545eb20457  ClaimWeave-Project.zip" | sha256sum --check
+          unzip -q ClaimWeave-Project.zip -d /tmp/claimweave-source
+          cp -R /tmp/claimweave-source/dist /tmp/claimweave-source/docs /tmp/claimweave-source/scripts /tmp/claimweave-source/test .
+          cp /tmp/claimweave-source/package.json /tmp/claimweave-source/server.mjs /tmp/claimweave-source/README.md /tmp/claimweave-source/ClaimWeave-Demo.html .
+      - run: npm test
+      - run: npm run build
+      - name: Prepare static demo
+        run: |
+          cp dist/index.html dist/styles.css dist/app.js dist/engine.js docs/
+          touch docs/.nojekyll
+      - name: Commit expanded source and verified demo assets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dist docs scripts test package.json server.mjs README.md ClaimWeave-Demo.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Expand verified ClaimWeave source and prepare demo"
+            git push
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: claimweave-static-demo
+          path: dist
