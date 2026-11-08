@@ -1,4 +1,6 @@
-[Open the live demo](https://yasminetriguii.github.io/claimweave/) · [Verification workflow](https://github.com/yasminetriguii/claimweave/actions/workflows/verify.yml)
+## Account backend v0.3
+
+Real username/password accounts, private SQLite workspaces, expiring sessions, revision-safe saves and server-checked evidence packets are now in source. Run npm start with Node 24. See [backend setup and security boundaries](docs/BACKEND.md). The GitHub Pages URL remains a static demo; hosted sign-in and external account connections are not live.
 
 # ClaimWeave
 
@@ -8,7 +10,7 @@ A working policy evidence workbench that makes consent, freshness, conflicting r
 
 ## Try it
 
-Requires Node.js 22 or newer. No API keys, dependencies, accounts, or installation step.
+Requires Node.js 24 or newer. No package installation step. Accounts are optional when using the Node backend.
 
 ```sh
 npm start
@@ -48,7 +50,7 @@ flowchart TD
   R --> X["Minimal packet gate"]
 ```
 
-The UI is a static ES-module application. `dist/engine.js` is framework-independent and has no DOM or I/O dependencies. `server.mjs` is a loopback-only development server with an asset allowlist and restrictive headers. State stays in browser memory and resets on reload. A packet is reconstructed from explicit fields; source objects are never serialized wholesale.
+The UI is a static ES-module application. `dist/engine.js` is framework-independent and has no DOM or I/O dependencies. `server.mjs` is a loopback-only development server with an asset allowlist and restrictive headers. Unsaved state stays in browser memory. Optional authenticated workspaces persist in SQLite through the Node backend. A packet is reconstructed from explicit fields; source objects are never serialized wholesale.
 
 ## Research and originality
 
@@ -56,10 +58,12 @@ Reusable benefits verification is an existing category. ClaimWeave explores a co
 
 ## Scope and limitations
 
-All programs, rules, connectors, and applicant records are fictional. No live payroll or government integrations, actual eligibility decisions, identity verification, OCR, cryptographic proofs, backend access controls, or production audit log. Browser imports are for synthetic data only. Consent withdrawal gates future downloads in this prototype; it does not erase copies previously exported. Real records require a separate security, legal, accessibility, and domain-validation process. Evaluation statuses describe demonstration checks only.
+All programs, rules, connectors, and applicant records are fictional. No live payroll or government integrations, actual eligibility decisions, identity verification, OCR, cryptographic proofs, production security review or production audit log. Browser imports are for synthetic data only. Consent withdrawal gates future downloads in this prototype; it does not erase copies previously exported. Real records require a separate security, legal, accessibility, and domain-validation process. Evaluation statuses describe demonstration checks only.
 
 There is no runtime AI in this version. OpenAI Codex was used for research, coding, UI design, tests, and documentation. Do not describe the deterministic rules engine as a trained model. The project is not affiliated with or endorsed by YC, CMS, Reclaim, or any government agency.
 
 ## Hackathon provenance
 
 Implementation began November 8, 2026. No pre-existing competitor code was copied. Disclose AI assistance and the specific human contributions in any submission. Registration and submission are separate actions; this repository does not imply either has occurred. See [the submission draft](docs/SUBMISSION.md).
+
+
