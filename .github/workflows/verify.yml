@@ -11,6 +11,19 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-disposable-password
+          POSTGRES_DB: claimweave_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -40,7 +53,26 @@ jobs:
           unzip -q ClaimWeave-v03.zip -d /tmp/claimweave-v03
           cp -R /tmp/claimweave-v03/dist /tmp/claimweave-v03/docs /tmp/claimweave-v03/scripts /tmp/claimweave-v03/test .
           cp /tmp/claimweave-v03/package.json /tmp/claimweave-v03/server.mjs /tmp/claimweave-v03/backend.mjs /tmp/claimweave-v03/README.md /tmp/claimweave-v03/Dockerfile .
+      - name: Expand verified free-hosting release once
+        if: hashFiles('storage.mjs') == '' && hashFiles('ClaimWeave-v031.zip') != ''
+        run: |
+          set -euo pipefail
+          echo "fa9dc13c52c17cfebb7cd9b7349d449db989efc078427087dfece1893442277b  ClaimWeave-v031.zip" | sha256sum --check
+          unzip -q ClaimWeave-v031.zip -d /tmp/claimweave-v031
+          cp -R /tmp/claimweave-v031/dist /tmp/claimweave-v031/docs /tmp/claimweave-v031/scripts /tmp/claimweave-v031/test .
+          cp /tmp/claimweave-v031/package.json /tmp/claimweave-v031/server.mjs /tmp/claimweave-v031/backend.mjs /tmp/claimweave-v031/storage.mjs /tmp/claimweave-v031/Dockerfile .
+      - run: npm install --ignore-scripts
       - run: npm test
+      - name: Verify PostgreSQL account isolation and consent
+        if: hashFiles('storage.mjs') != ''
+        env:
+          TEST_DATABASE_URL: postgres://postgres:ci-disposable-password@localhost:5432/claimweave_test
+        run: node --test test/backend.test.js
+      - name: Verify PostgreSQL over real HTTP
+        if: hashFiles('storage.mjs') != ''
+        env:
+          DATABASE_URL: postgres://postgres:ci-disposable-password@localhost:5432/claimweave_test
+        run: npm run test:http
       - name: Verify real HTTP account lifecycle
         if: hashFiles('backend.mjs') != ''
         run: npm run test:http
@@ -56,6 +88,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add dist docs scripts test package.json server.mjs README.md ClaimWeave-Demo.html
           if [ -f backend.mjs ]; then git add backend.mjs Dockerfile; fi
+          if [ -f storage.mjs ]; then git add storage.mjs package-lock.json; fi
           if ! git diff --cached --quiet; then
             git commit -m "Expand verified ClaimWeave source and prepare demo"
             git push
